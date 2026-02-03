@@ -156,7 +156,7 @@ public class Podcast extends Contenido implements Reproducible, Descargable {
     }
 
     @Override
-    public boolean descargar() throws LimiteDescargasException, ContenidoYaDescargadoException {
+    public boolean descargar() throws ContenidoYaDescargadoException {
         return false;
     }
 

@@ -5,6 +5,8 @@ import excepciones.contenido.ArchivoAudioNoEncontradoException;
 import excepciones.contenido.ContenidoNoDisponibleException;
 import excepciones.contenido.DuracionInvalidaException;
 import excepciones.contenido.LetraNoDisponibleException;
+import excepciones.descarga.ContenidoYaDescargadoException;
+import excepciones.descarga.LimiteDescargasException;
 import interfaces.Descargable;
 import interfaces.Reproducible;
 
@@ -196,7 +198,7 @@ public class Cancion extends Contenido implements Reproducible, Descargable {
     }
 
     @Override
-    public boolean descargar() throws LimiteDescargasException, ContenidoYaDescargadoException {
+    public boolean descargar() throws  ContenidoYaDescargadoException {
         return false;
     }
 
