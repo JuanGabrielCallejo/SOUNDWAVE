@@ -125,7 +125,11 @@ public abstract class Contenido {
         }
     }
 
-    public void agregarTag(String tag){};
+    public void agregarTag(String tag){
+        if(tag != null && !tag.isEmpty() && !tags.contains(tag)){
+            tags.add(tag.toLowerCase());
+        }
+    };
 
     public boolean tieneTag(String tag){
         return tags.contains(tag);
