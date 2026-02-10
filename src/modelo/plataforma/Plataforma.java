@@ -1,18 +1,27 @@
 package modelo.plataforma;
 
+import enums.CategoriaPodcast;
+import enums.GeneroMusical;
 import enums.TipoSuscripcion;
+import excepciones.artista.AlbumCompletoException;
 import excepciones.artista.AlbumYaExisteException;
 import excepciones.artista.ArtistaNoVerificadoException;
+import excepciones.artista.LimiteEpisodiosException;
 import excepciones.contenido.ArchivoAudioNoEncontradoException;
+import excepciones.contenido.DuracionInvalidaException;
 import excepciones.plataforma.ArtistaNoEncontradoException;
+import excepciones.plataforma.ContenidoNoEncontradoException;
 import excepciones.plataforma.UsuarioYaExisteException;
 import excepciones.usuario.EmailInvalidoException;
 import excepciones.usuario.PasswordDebilException;
 import modelo.artistas.Album;
 import modelo.artistas.Artista;
 import modelo.artistas.Creador;
+import modelo.contenido.Cancion;
 import modelo.contenido.Contenido;
+import modelo.contenido.Podcast;
 import modelo.usuarios.Usuario;
+import modelo.usuarios.UsuarioGratuito;
 import modelo.usuarios.UsuarioPremium;
 import modelo.utilidades.RecomendadorIA;
 
@@ -78,10 +87,6 @@ public class Plataforma {
         this.catalogo = catalogo;
     }
 
-    public ArrayList<Playlist> getPlaylistPublicas() {
-        return playlistPublicas;
-    }
-
     public void setPlaylistPublicas(ArrayList<Playlist> playlistPublicas) {
         this.playlistPublicas = playlistPublicas;
     }
@@ -100,10 +105,6 @@ public class Plataforma {
 
     public void setCreadores(HashMap<String, Creador> creadores) {
         this.creadores = creadores;
-    }
-
-    public ArrayList<Album> getAlbumes() {
-        return albumes;
     }
 
     public void setAlbumes(ArrayList<Album> albumes) {
@@ -182,7 +183,7 @@ public class Plataforma {
 
     //GESTIÓN DE ARTISTAS
 
-    public Artista registrarArtista(String nombreArtistico, String nombreReal, String paisOrigen, boolean verificado, String nombreReal, String paisOrigen, ) {
+    public Artista registrarArtista(String nombreArtistico, String nombreReal, String paisOrigen, boolean verificado) {
         return null;
     }
 
@@ -206,12 +207,100 @@ public class Plataforma {
 
     public Album crearAlbum(Artista artista, String titulo, Date fecha) throws ArtistaNoVerificadoException, AlbumYaExisteException{
         return null;
+
+    }
+
+    public ArrayList<Album> getAlbumes(){
+        return null;
+    };
+
+    //GESTOR DE CANCIIONES
+
+    public Cancion crearCancion(String titulo, int duracion, Artista artista, GeneroMusical genero)throws DuracionInvalidaException {
+        return null;
+    }
+
+    public Cancion crearCancionAlbum(String titulo, int duracion, Artista artista, GeneroMusical genero, Album album)throws DuracionInvalidaException, AlbumCompletoException {
+        return null;
+    }
+
+    public void agregarCancionCatalogo(Contenido contenido){}
+
+    public ArrayList<Cancion> getCanciones(){
+        return null;
+    }
+
+    //GESTIÓN DE CREADORES/PODCAST
+
+    private Creador registrarCreador(String nombreCanal, String nombre, String descripcion){
+        return null;
+    }
+
+    private void registrarCreador(Creador creador){
+
+    }
+
+    private Podcast crearPodcast(String titulo, int duracion, Creador creador, int numEpisodio, int temporada, CategoriaPodcast categoria) throws DuracionInvalidaException, LimiteEpisodiosException{
+        return null;
+    }
+
+    public ArrayList<Podcast> getPodcasts() {
+        return null;
+    }
+
+    public ArrayList<Creador> getTodosLosCreadores() {
+        return null;
+    }
+
+    //GESTION DE PLAYLISTS PUBLICAS
+
+    private Playlist crearPlaylistPublica (String nombre, Usuario creador){
+        return null;
+    }
+
+    private ArrayList<Playlist> getPlaylistPublicas(){
+        return null;
+    }
+
+    //GESTION DE BUSQUEDAS
+
+    private ArrayList<Contenido> buscarContenido(String termino) throws ContenidoNoEncontradoException{
+        return null;
+    }
+
+    private ArrayList<Cancion> buscarPorGenero(GeneroMusical genero) throws ContenidoNoEncontradoException{
+        return null;
+    }
+
+    private ArrayList<Podcast> buscarPorCategoria(CategoriaPodcast categorio) throws ContenidoNoEncontradoException{
+        return null;
+    }
+
+    ArrayList<Contenido> obtenerTopContenidos(int Cantidad){
+        return null;
+    }
+
+    // GESTIÓN DE ANUNCIOS
+
+    private Anuncio obtenerAnuncioAleatorio(){
+        return null;
+    }
+
+    private void incrementarAnunciosReproducidos() {
+        totalAnunciosReproducidos++;
+    }
+
+    // GESTION DE ESTADISTICAS
+
+    private String obtenerEstadisticasGenerales(){
+        return null;
     }
 
 
-
-
-
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
 
 
