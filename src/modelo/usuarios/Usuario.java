@@ -11,6 +11,7 @@ import modelo.plataforma.Playlist;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 public abstract class Usuario {
 
@@ -26,15 +27,28 @@ public abstract class Usuario {
     protected ArrayList<Contenido> contenidosLiked;
 
     public Usuario(String nombre, String email, String password, TipoSuscripcion suscripcion) throws EmailInvalidoException, PasswordDebilException {
-
+        this.id = UUID.randomUUID().toString();
         this.nombre = nombre;
         this.email = email;
         this.password = password;
         this.suscripcion = suscripcion;
+        this.misPlaylists = new ArrayList<>();
+        this.historial = new ArrayList<>();
+        this.fechaRegistro = new Date();
+        this.playlistSeguidas = new ArrayList<>();
+        this.contenidosLiked = new ArrayList<>();
+    }
+
+    public Usuario() {
+        this.id = UUID.randomUUID().toString();
+        this.misPlaylists = new ArrayList<>();
+        this.historial = new ArrayList<>();
+        this.fechaRegistro = new Date();
+        this.playlistSeguidas = new ArrayList<>();
+        this.contenidosLiked = new ArrayList<>();
     }
 
     //getters y setters
-
 
     public String getId() {
         return id;
@@ -100,6 +114,10 @@ public abstract class Usuario {
         this.fechaRegistro = fechaRegistro;
     }
 
+    public ArrayList<Playlist> getPlaylistsSeguidas() {
+        return playlistSeguidas;
+    }
+
     public ArrayList<Playlist> getPlaylistSeguidas() {
         return playlistSeguidas;
     }
@@ -116,69 +134,79 @@ public abstract class Usuario {
         this.contenidosLiked = contenidosLiked;
     }
 
-    public abstract void reproducir (Contenido contenido) throws ContenidoNoDisponibleException, LimiteDiarioAlcanzadoException, AnuncioRequeridoException;
+    public abstract void reproducir(Contenido contenido) throws ContenidoNoDisponibleException, LimiteDiarioAlcanzadoException, AnuncioRequeridoException;
 
-
-    public Playlist crearPlaylist(String nombrePlaylist){
-        return null;
+    public Playlist crearPlaylist(String nombrePlaylist) {
+        Playlist playlist = new Playlist(nombrePlaylist, this);
+        playlist.setId(UUID.randomUUID().toString());
+        playlist.setContenidos(new ArrayList<>());
+        playlist.setFechaCreacion(new Date());
+        misPlaylists.add(playlist);
+        return playlist;
     }
 
-    public void  seguirPlaylist(Playlist playlist){
+    public void seguirPlaylist(Playlist playlist) {
+        if (!playlistSeguidas.contains(playlist)) {
+            playlistSeguidas.add(playlist);
+            playlist.incrementarSeguidores();
+        }
     }
 
-    public void dejarDeSeguirPlaylist(Playlist playlist){
+    public void dejarDeSeguirPlaylist(Playlist playlist) {
+        if (playlistSeguidas.remove(playlist)) {
+            playlist.decrementarSeguidores();
+        }
     }
 
-    public void darLike(Contenido contenido){
-
+    public void darLike(Contenido contenido) {
+        if (!contenidosLiked.contains(contenido)) {
+            contenidosLiked.add(contenido);
+            contenido.agregarLike();
+        }
     }
 
-    public void quitarLike(Contenido contenido){
-
+    public void quitarLike(Contenido contenido) {
+        contenidosLiked.remove(contenido);
     }
 
     public boolean validarEmail() throws EmailInvalidoException {
-        return false;
+        if (email == null || email.isEmpty() || !email.contains("@")) {
+            throw new EmailInvalidoException("Email inválido");
+        }
+        return true;
     }
 
     public boolean validarPassword() throws PasswordDebilException {
-            return false;
+        if (password == null || password.length() < 8) {
+            throw new PasswordDebilException("Password débil");
+        }
+        return true;
     }
 
-    public void agregarAlHistorial(Contenido contenido){}
-
-    public void limpiarHistorial(){}
-
-    public boolean esPremium(){
-        return false;
+    public void agregarAlHistorial(Contenido contenido) {
+        if (!historial.contains(contenido)) {
+            historial.add(contenido);
+        }
     }
 
-    public Usuario() {
-        super();
+    public void limpiarHistorial() {
+        historial.clear();
+    }
+
+    public boolean esPremium() {
+        return suscripcion != TipoSuscripcion.GRATUITO;
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Usuario{nombre='" + nombre + "', email='" + email + "', suscripcion=" + suscripcion + "}";
     }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Usuario usuario = (Usuario) obj;
+        return id != null && id.equals(usuario.id);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

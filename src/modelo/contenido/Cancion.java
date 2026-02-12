@@ -9,13 +9,11 @@ import excepciones.descarga.ContenidoYaDescargadoException;
 import excepciones.descarga.LimiteDescargasException;
 import interfaces.Descargable;
 import interfaces.Reproducible;
-
-
-
+import modelo.artistas.Album;
+import modelo.artistas.Artista;
 
 import java.util.ArrayList;
 import java.util.Date;
-
 
 public class Cancion extends Contenido implements Reproducible, Descargable {
 
@@ -31,11 +29,10 @@ public class Cancion extends Contenido implements Reproducible, Descargable {
     private boolean descargado;
 
     public Cancion(String titulo, int duracionSegundos, Artista artista, GeneroMusical genero) throws DuracionInvalidaException {
-
-
         super(titulo, duracionSegundos);
         this.artista = artista;
         this.genero = genero;
+        this.ISRC = generarISRC();
     }
 
     public Cancion(String titulo, int duracionSegundos, Artista artista, GeneroMusical genero, String letra, boolean explicit) throws DuracionInvalidaException {
@@ -44,6 +41,7 @@ public class Cancion extends Contenido implements Reproducible, Descargable {
         this.genero = genero;
         this.letra = letra;
         this.explicit = explicit;
+        this.ISRC = generarISRC();
     }
 
     public String getLetra() {
@@ -126,94 +124,89 @@ public class Cancion extends Contenido implements Reproducible, Descargable {
         this.descargado = descargado;
     }
 
-    //Metodo privado para dar ISRC
-
     private String generarISRC() {
-        // Lógica para generar un código ISRC único
         return "ISRC" + System.currentTimeMillis() % 1000000000;
     }
 
-    //Metodos propios publicos
-
-    public String obtenerLetra() throws LetraNoDisponibleException{};
-
-    public boolean esExplicit(){
-        if(esExplicit()){
-            return true;
-        }else{
-            return false;
+    public String obtenerLetra() throws LetraNoDisponibleException {
+        if (letra == null || letra.isEmpty()) {
+            throw new LetraNoDisponibleException("La letra no está disponible");
         }
-    };
-
-    public void cambiarGenero (GeneroMusical generomusical){
-
+        return letra;
     }
 
-    public void validarAudioURL() throws ArchivoAudioNoEncontradoException{
-        if(audioURL == null) {
+    public boolean esExplicit() {
+        return explicit;
+    }
+
+    public void cambiarGenero(GeneroMusical generoMusical) {
+        this.genero = generoMusical;
+    }
+
+    public void validarAudioURL() throws ArchivoAudioNoEncontradoException {
+        if (audioURL == null || audioURL.isEmpty()) {
             throw new ArchivoAudioNoEncontradoException("No se ha encontrado la url de la canción");
         }
-
     }
-
-
-
-
-
-
-
-    //OVERRIDES
-
-    //overrride que viene de contenido
 
     @Override
     public void reproducir() throws ContenidoNoDisponibleException {
-        if (!isDisponible()){
-            throw new ContenidoNoDisponibleException("La cancion no esta disponible para reproducir.");
-        } else {
-            this.reproduciendo = true;
-            //me queda llamar a aumentar reproducciones;
-
+        if (!isDisponible()) {
+            throw new ContenidoNoDisponibleException("La canción no está disponible para reproducir.");
         }
+        this.reproduciendo = true;
+        aumentarReproducciones();
     }
 
     @Override
     public void play() {
-
+        this.reproduciendo = true;
+        this.pausado = false;
     }
 
     @Override
     public void pause() {
-
+        this.reproduciendo = false;
+        this.pausado = true;
     }
 
     @Override
     public void stop() {
-
+        this.reproduciendo = false;
+        this.pausado = false;
     }
 
     @Override
     public int getDuracion() {
-        return 0;
+        return getDuracionSegundos();
     }
 
     @Override
-    public boolean descargar() throws  ContenidoYaDescargadoException {
-        return false;
+    public boolean descargar() throws ContenidoYaDescargadoException {
+        if (descargado) {
+            throw new ContenidoYaDescargadoException("La canción ya está descargada");
+        }
+        this.descargado = true;
+        return true;
     }
 
     @Override
     public boolean eliminarDescarga() {
+        if (descargado) {
+            this.descargado = false;
+            return true;
+        }
         return false;
     }
 
     @Override
     public int espacioRequerido() {
-        return 0;
+        // Estimación: 1MB por minuto de audio
+        return getDuracionSegundos() / 60 + 1;
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Cancion{titulo='" + getTitulo() + "', artista=" + (artista != null ? artista.getNombreArtistico() : "N/A") + ", genero=" + genero + "}";
     }
 }

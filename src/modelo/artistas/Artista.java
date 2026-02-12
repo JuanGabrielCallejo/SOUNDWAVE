@@ -6,6 +6,7 @@ import modelo.contenido.Cancion;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 public class Artista {
 
@@ -20,20 +21,24 @@ public class Artista {
     private String biografia;
 
     public Artista(String nombreArtistico, String nombreReal, String paisOrigen) {
+        this.id = UUID.randomUUID().toString();
         this.nombreArtistico = nombreArtistico;
         this.nombreReal = nombreReal;
         this.paisOrigen = paisOrigen;
+        this.discografia = new ArrayList<>();
+        this.albumes = new ArrayList<>();
     }
 
     public Artista(String nombreArtistico, String nombreReal, String paisOrigen, boolean verificado, String biografia) {
+        this.id = UUID.randomUUID().toString();
         this.nombreArtistico = nombreArtistico;
         this.nombreReal = nombreReal;
         this.paisOrigen = paisOrigen;
         this.verificado = verificado;
         this.biografia = biografia;
+        this.discografia = new ArrayList<>();
+        this.albumes = new ArrayList<>();
     }
-
-
 
     public String getId() {
         return id;
@@ -107,53 +112,90 @@ public class Artista {
         this.biografia = biografia;
     }
 
-    public void publicarCancion (Cancion cancion) {
+    public void publicarCancion(Cancion cancion) {
         if (discografia == null) {
             discografia = new ArrayList<>();
         }
-        discografia.add(cancion);
+        if (!discografia.contains(cancion)) {
+            discografia.add(cancion);
+        }
     }
 
-     public Album crearAlbum(String titulo, Date fecha) throws ArtistaNoVerificadoException, AlbumYaExisteException{
-         return null;
-     }
+    public Album crearAlbum(String titulo, Date fecha) throws ArtistaNoVerificadoException, AlbumYaExisteException {
+        if (!verificado) {
+            throw new ArtistaNoVerificadoException("El artista no está verificado");
+        }
+
+        for (Album a : albumes) {
+            if (a.getTitulo().equalsIgnoreCase(titulo)) {
+                throw new AlbumYaExisteException("Ya existe un álbum con ese título");
+            }
+        }
+
+        Album album = new Album(titulo, this, fecha);
+        albumes.add(album);
+        return album;
+    }
 
     public ArrayList<Cancion> obtenerTopCanciones(int cantidad) {
-        return null;
+        ArrayList<Cancion> copia = new ArrayList<>(discografia);
+        copia.sort((c1, c2) -> Integer.compare(c2.getReproducciones(), c1.getReproducciones()));
+
+        if (cantidad >= copia.size()) {
+            return copia;
+        }
+
+        return new ArrayList<>(copia.subList(0, cantidad));
     }
 
-    public double calcularPromedioReproducciones(){
+    public double calcularPromedioReproducciones() {
+        if (discografia == null || discografia.isEmpty()) {
+            return 0;
+        }
 
-        return 0;
+        int total = 0;
+        for (Cancion c : discografia) {
+            total += c.getReproducciones();
+        }
+
+        return (double) total / discografia.size();
     }
 
-    public boolean esVerificado(){
-        return false;
+    public boolean esVerificado() {
+        return verificado;
     }
 
-    public int getTotalReproducciones(){
-
-        return 0;
+    public int getTotalReproducciones() {
+        int total = 0;
+        for (Cancion c : discografia) {
+            total += c.getReproducciones();
+        }
+        return total;
     }
 
-    public void verificar(){
-
+    public void verificar() {
+        this.verificado = true;
     }
 
-    public void incrementarOyentes(){}
+    public void incrementarOyentes() {
+        this.oyentesMensuales++;
+    }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Artista artista = (Artista) obj;
+        return id != null && id.equals(artista.id);
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Artista{nombreArtistico='" + nombreArtistico + "', verificado=" + verificado + "}";
     }
 }

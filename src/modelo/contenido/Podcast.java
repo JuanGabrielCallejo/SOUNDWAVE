@@ -32,6 +32,7 @@ public class Podcast extends Contenido implements Reproducible, Descargable {
         this.numeroEpisodio = numeroEpisodio;
         this.temporada = temporada;
         this.categoria = categoria;
+        this.invitados = new ArrayList<>();
     }
 
     public Podcast(String titulo, int duracionSegundos, Creador creador, int numeroEpisodio, int temporada, CategoriaPodcast categoria, String descripcion) throws DuracionInvalidaException {
@@ -41,6 +42,7 @@ public class Podcast extends Contenido implements Reproducible, Descargable {
         this.temporada = temporada;
         this.categoria = categoria;
         this.descripcion = descripcion;
+        this.invitados = new ArrayList<>();
     }
 
     public Creador getCreador() {
@@ -123,76 +125,93 @@ public class Podcast extends Contenido implements Reproducible, Descargable {
         this.descargado = descargado;
     }
 
-    public String obtenerDescripcion(){
+    public String obtenerDescripcion() {
         return descripcion;
     }
 
-    public void agregarInvitado (String nombre){
+    public void agregarInvitado(String nombre) {
+        if (invitados == null) {
+            invitados = new ArrayList<>();
+        }
+        if (!invitados.contains(nombre)) {
+            invitados.add(nombre);
+        }
+    }
 
-    };
-
-
-    public boolean esTemporadaNueva(){
-      return false;
-    };
+    public boolean esTemporadaNueva() {
+        return numeroEpisodio == 1;
+    }
 
     public String obtenerTranscripcion() throws TranscripcionNoDisponibleException {
-    if(transcripcion == null){
-        throw new TranscripcionNoDisponibleException("No se ha podido recuperar la transcripción");
-    }return transcripcion;
-
-    };
-
+        if (transcripcion == null || transcripcion.isEmpty()) {
+            throw new TranscripcionNoDisponibleException("No se ha podido recuperar la transcripción");
+        }
+        return transcripcion;
+    }
 
     public void validarEpisodio() throws EpisodioNoEncontradoException {
-
-    };
-
-
-    @Override
-    public void reproducir() throws ContenidoNoDisponibleException {
-        if(!isDisponible()){
-            throw new ContenidoNoDisponibleException("El contenido no está disponible");
+        if (numeroEpisodio <= 0) {
+            throw new EpisodioNoEncontradoException("Número de episodio inválido");
         }
     }
 
     @Override
+    public void reproducir() throws ContenidoNoDisponibleException {
+        if (!isDisponible()) {
+            throw new ContenidoNoDisponibleException("El contenido no está disponible");
+        }
+        this.reproduciendo = true;
+        aumentarReproducciones();
+    }
+
+    @Override
     public boolean descargar() throws ContenidoYaDescargadoException {
-        return false;
+        if (descargado) {
+            throw new ContenidoYaDescargadoException("El podcast ya está descargado");
+        }
+        this.descargado = true;
+        return true;
     }
 
     @Override
     public boolean eliminarDescarga() {
+        if (descargado) {
+            this.descargado = false;
+            return true;
+        }
         return false;
     }
 
     @Override
     public int espacioRequerido() {
-        return 0;
+        return getDuracionSegundos() / 60 + 1;
     }
 
     @Override
     public void play() {
-
+        this.reproduciendo = true;
+        this.pausado = false;
     }
 
     @Override
     public void pause() {
-
+        this.reproduciendo = false;
+        this.pausado = true;
     }
 
     @Override
     public void stop() {
-
+        this.reproduciendo = false;
+        this.pausado = false;
     }
 
     @Override
     public int getDuracion() {
-        return 0;
+        return getDuracionSegundos();
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Podcast{titulo='" + getTitulo() + "', creador=" + (creador != null ? creador.getNombreCanal() : "N/A") + ", temporada=" + temporada + ", episodio=" + numeroEpisodio + "}";
     }
 }

@@ -14,18 +14,35 @@ import java.util.ArrayList;
 
 public class UsuarioPremium extends Usuario {
 
-    private boolean descargasOfline;
+    private boolean descargasOffline;
     private int maxDescargas;
-    private ArrayList<Contenido> dscargardos;
+    private ArrayList<Contenido> descargados;
     private String calidadAudio;
 
+    private static final int MAX_DESCARGAS_DEFAULT = 1000;
 
-    public boolean isDescargasOfline() {
-        return descargasOfline;
+    public UsuarioPremium(String nombre, String email, String password) throws EmailInvalidoException, PasswordDebilException {
+        super(nombre, email, password, TipoSuscripcion.PREMIUM);
+        this.descargasOffline = true;
+        this.maxDescargas = MAX_DESCARGAS_DEFAULT;
+        this.descargados = new ArrayList<>();
+        this.calidadAudio = "alta";
     }
 
-    public void setDescargasOfline(boolean descargasOfline) {
-        this.descargasOfline = descargasOfline;
+    public UsuarioPremium(String nombre, String email, String password, TipoSuscripcion suscripcion) throws EmailInvalidoException, PasswordDebilException {
+        super(nombre, email, password, suscripcion);
+        this.descargasOffline = true;
+        this.maxDescargas = MAX_DESCARGAS_DEFAULT;
+        this.descargados = new ArrayList<>();
+        this.calidadAudio = "alta";
+    }
+
+    public boolean isDescargasOffline() {
+        return descargasOffline;
+    }
+
+    public void setDescargasOffline(boolean descargasOffline) {
+        this.descargasOffline = descargasOffline;
     }
 
     public int getMaxDescargas() {
@@ -36,12 +53,12 @@ public class UsuarioPremium extends Usuario {
         this.maxDescargas = maxDescargas;
     }
 
-    public ArrayList<Contenido> getDscargardos() {
-        return dscargardos;
+    public ArrayList<Contenido> getDescargados() {
+        return descargados;
     }
 
-    public void setDscargardos(ArrayList<Contenido> dscargardos) {
-        this.dscargardos = dscargardos;
+    public void setDescargados(ArrayList<Contenido> descargados) {
+        this.descargados = descargados;
     }
 
     public String getCalidadAudio() {
@@ -52,45 +69,54 @@ public class UsuarioPremium extends Usuario {
         this.calidadAudio = calidadAudio;
     }
 
-    private static final int MAX_DESCARGAS_DEFAULT = 1000;
-
-    public UsuarioPremium(String nombre, String email, String password) throws EmailInvalidoException, PasswordDebilException {
-        super(nombre, email, password, TipoSuscripcion.PREMIUM);
-    }
-
-    public UsuarioPremium(String nombre, String email, String password, TipoSuscripcion suscripcion) throws EmailInvalidoException, PasswordDebilException {
-        super(nombre, email, password, suscripcion);
+    public int getNumDescargados() {
+        return descargados.size();
     }
 
     @Override
     public void reproducir(Contenido contenido) throws ContenidoNoDisponibleException, LimiteDiarioAlcanzadoException, AnuncioRequeridoException {
+        if (!contenido.isDisponible()) {
+            throw new ContenidoNoDisponibleException("El contenido no está disponible");
+        }
 
+        contenido.aumentarReproducciones();
+        agregarAlHistorial(contenido);
     }
 
+    public void descargar(Contenido contenido) throws LimiteDescargasException, ContenidoYaDescargadoException {
+        if (descargados.contains(contenido)) {
+            throw new ContenidoYaDescargadoException("El contenido ya está descargado");
+        }
 
-    public void descargar(Contenido contenido) throws LimiteDescargasException, ContenidoYaDescargadoException{}
+        if (descargados.size() >= maxDescargas) {
+            throw new LimiteDescargasException("Has alcanzado el límite de descargas");
+        }
 
-    public boolean eliminarDescarga(Contenido contenido){
-        return false;
+        descargados.add(contenido);
     }
 
-    public boolean verificarEspacioDescarga(){
-        return false;
+    public boolean eliminarDescarga(Contenido contenido) {
+        return descargados.remove(contenido);
     }
 
-    public int geDescargasRestantes(){
-        return 0;
+    public boolean verificarEspacioDescarga() {
+        return descargados.size() < maxDescargas;
     }
 
-    public void cambiarCalidadAudio(String calidad){}
+    public int getDescargasRestantes() {
+        return maxDescargas - descargados.size();
+    }
 
-    public void limpiarDescargas(){}
+    public void cambiarCalidadAudio(String calidad) {
+        this.calidadAudio = calidad;
+    }
 
-
+    public void limpiarDescargas() {
+        descargados.clear();
+    }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "UsuarioPremium{nombre='" + nombre + "', email='" + email + "', suscripcion=" + suscripcion + "}";
     }
-
 }

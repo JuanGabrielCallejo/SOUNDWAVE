@@ -1,4 +1,4 @@
-package modelo.utilidades;
+package utilidades;
 
 import modelo.artistas.Creador;
 import modelo.contenido.Podcast;
@@ -112,11 +112,13 @@ public class EstadisticasCreador {
             totalLikes += p.getLikes();
             duracionTotalSegundos += p.getDuracionSegundos();
 
+            // Episodio más popular
             if (p.getReproducciones() > maxRepros) {
                 maxRepros = p.getReproducciones();
                 episodioMasPopular = p;
             }
 
+            // Contar episodios por temporada
             int temporada = p.getTemporada();
             episodiosPorTemporada.put(temporada, episodiosPorTemporada.getOrDefault(temporada, 0) + 1);
         }
@@ -161,6 +163,7 @@ public class EstadisticasCreador {
     }
 
     public int estimarCrecimientoMensual() {
+        // Estimación simple basada en el promedio de reproducciones
         return (int) (promedioReproducciones * 0.1);
     }
 

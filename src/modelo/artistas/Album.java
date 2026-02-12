@@ -1,10 +1,14 @@
 package modelo.artistas;
 
+import enums.GeneroMusical;
+import excepciones.artista.AlbumCompletoException;
+import excepciones.contenido.DuracionInvalidaException;
 import excepciones.playlist.CancionNoEncontradaException;
 import modelo.contenido.Cancion;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 public class Album {
 
@@ -20,15 +24,19 @@ public class Album {
     private static final int MAX_CANCIONES = 20;
 
     public Album(String titulo, Artista artista, Date fechaLanzamiento) {
+        this.id = UUID.randomUUID().toString();
         this.titulo = titulo;
         this.artista = artista;
         this.fechaLanzamiento = fechaLanzamiento;
+        this.canciones = new ArrayList<>();
     }
 
     public Album(String titulo, Artista artista, Date fechaLanzamiento, String discografica, String tipoAlbum) {
+        this.id = UUID.randomUUID().toString();
         this.titulo = titulo;
         this.artista = artista;
         this.fechaLanzamiento = fechaLanzamiento;
+        this.canciones = new ArrayList<>();
         this.discografica = discografica;
         this.tipoAlbum = tipoAlbum;
     }
@@ -97,50 +105,95 @@ public class Album {
         this.tipoAlbum = tipoAlbum;
     }
 
-    public void eliminarCancion(int posicion) throws CancionNoEncontradaException{
-        if(posicion < 0 || posicion >= canciones.size()){
+    public int getMaxCanciones() {
+        return MAX_CANCIONES;
+    }
+
+    // COMPOSICIÓN: El álbum crea sus propias canciones
+    public Cancion crearCancion(String titulo, int duracion, GeneroMusical genero) throws DuracionInvalidaException, AlbumCompletoException {
+        if (canciones.size() >= MAX_CANCIONES) {
+            throw new AlbumCompletoException("El álbum ya tiene el máximo de canciones permitidas");
+        }
+
+        Cancion cancion = new Cancion(titulo, duracion, artista, genero);
+        cancion.setAlbum(this);
+        canciones.add(cancion);
+        artista.publicarCancion(cancion);
+        return cancion;
+    }
+
+    public void eliminarCancion(int posicion) throws CancionNoEncontradaException {
+        if (posicion <= 0 || posicion > canciones.size()) {
             throw new CancionNoEncontradaException("La canción en la posición " + posicion + " no existe en el álbum.");
         }
-        Cancion cancion = canciones.remove(posicion -1);
+        Cancion cancion = canciones.remove(posicion - 1);
         cancion.setAlbum(null);
     }
 
-    public void eliminarCancion(Cancion cancion){}
-
-    public int getNumeroCanciones(){
-        return 0;
+    public void eliminarCancion(Cancion cancion) {
+        canciones.remove(cancion);
+        cancion.setAlbum(null);
     }
 
-    public void ordernarPorPopularidad(){
-
+    public int getNumCanciones() {
+        return canciones.size();
     }
 
-    public Cancion getCancion(int posicion) throws CancionNoEncontradaException{
-        if(posicion < 0 || posicion >= canciones.size()){
+    public void ordenarPorPopularidad() {
+        canciones.sort((c1, c2) -> Integer.compare(c2.getReproducciones(), c1.getReproducciones()));
+    }
+
+    public Cancion getCancion(int posicion) throws CancionNoEncontradaException {
+        if (posicion <= 0 || posicion > canciones.size()) {
             throw new CancionNoEncontradaException("La canción en la posición " + posicion + " no existe en el álbum.");
         }
-        return canciones.get(posicion);
+        return canciones.get(posicion - 1);
     }
 
-    public int getTotalRepoducciones(){
-        return 0;
+    public int getTotalReproducciones() {
+        int total = 0;
+        for (Cancion c : canciones) {
+            total += c.getReproducciones();
+        }
+        return total;
     }
 
+    public int getDuracionTotal() {
+        int total = 0;
+        for (Cancion c : canciones) {
+            total += c.getDuracionSegundos();
+        }
+        return total;
+    }
+
+    public String getDuracionTotalFormateada() {
+        int segundos = getDuracionTotal();
+        int horas = segundos / 3600;
+        int minutos = (segundos % 3600) / 60;
+        int segs = segundos % 60;
+
+        if (horas > 0) {
+            return String.format("%d:%02d:%02d", horas, minutos, segs);
+        } else {
+            return String.format("%02d:%02d", minutos, segs);
+        }
+    }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Album album = (Album) obj;
+        return id != null && id.equals(album.id);
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Album{titulo='" + titulo + "', artista=" + artista.getNombreArtistico() + ", canciones=" + canciones.size() + "}";
     }
-
-
 }

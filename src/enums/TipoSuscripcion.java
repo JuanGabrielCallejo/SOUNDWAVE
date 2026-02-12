@@ -20,9 +20,9 @@ public enum TipoSuscripcion {
         this.descargasOffline = descargasOffline;
     }
 
-    private double getPrecioMensual(){
+    public double getPrecioMensual(){
         return precioMensual;
-    };
+    }
 
     private boolean isSinAnuncios(){
         return false;
