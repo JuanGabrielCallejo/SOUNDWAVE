@@ -18,6 +18,8 @@ public class EstadisticasCreador {
     private HashMap<Integer, Integer> episodiosPorTemporada;
 
 
+
+
     public Creador getCreador() {
         return creador;
     }
